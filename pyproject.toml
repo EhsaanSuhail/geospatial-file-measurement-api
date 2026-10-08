@@ -1,0 +1,64 @@
+[project]
+name = "geomeasure-api"
+dynamic = ["version"]
+description = "REST API that ingests KML files and zipped Shapefiles and computes CRS-aware area and length measurements."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.20",
+    "fastapi>=0.142",
+    "numpy>=2.2",
+    "psycopg[binary]>=3.3",
+    "pydantic>=2.13",
+    "pydantic-settings>=2.15",
+    "pyogrio>=0.13",
+    "pyproj>=3.8",
+    "python-multipart>=0.0.32",
+    "shapely>=2.2",
+    "sqlalchemy>=2.1",
+    "uvicorn>=0.54",
+]
+
+[project.optional-dependencies]
+dev = [
+    "httpx2>=2.13",
+    "pytest>=9.1",
+    "pytest-cov>=7.1",
+    "ruff>=0.16",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "app/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers --import-mode=importlib"
+filterwarnings = [
+    "error",
+    # Raised inside pyogrio 0.13 when reading KML date fields with NumPy >= 2.5; not our code.
+    "ignore:The 'generic' unit for NumPy timedelta is deprecated:DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["app"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF", "PTH", "N"]
+
+[tool.ruff.lint.per-file-ignores]
+# FastAPI's dependency-injection idiom puts Depends()/File() in argument defaults.
+"app/api/**" = ["B008"]
